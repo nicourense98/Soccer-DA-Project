@@ -104,7 +104,7 @@ def extract_league_data(league_url):
 
 # Main
 
-# Call function and add to global season variable so that seasons input (website) changes
+# Call function and add to global season variable so that seasons column changes appropriately
 extract_league_data(season_09_10)
 curr_season += 1
 extract_league_data(season_10_11)
