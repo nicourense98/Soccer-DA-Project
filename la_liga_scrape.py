@@ -44,7 +44,7 @@ options = Options()
 options.headless = True
 options.add_argument("--window-size=1920,1200")
 
-# Extract both La Liga and Premier League standings data
+# Extract La Liga standings data
 def extract_league_data(league_url):
 	teams = []
 	pts = []
@@ -75,7 +75,7 @@ def extract_league_data(league_url):
 		elif i.text != '':
 			dictionary[club_header].append(i.text)
 
-	# Add first team in league (only because Google soccer standings HTML is weird)
+	# Add first team in league (only because Google soccer standings HTML is weird, first and last row is inconsistent with rest)
 	first_elements = driver.find_elements(by=By.XPATH, value="//td[@class='e9fBA xkW0Cc snctkc xL0E7c']")
 	if dictionary[pts_header] == None:
 		dictionary[pts_header] = [first_elements[skip_3].text]
@@ -131,6 +131,6 @@ extract_league_data(season_20_21)
 curr_season += 1
 extract_league_data(season_21_22)
 
-# Create csv file, output and name
+# Create and name csv file
 df = pd.DataFrame(dictionary)
 df.to_csv('la_liga_table.csv', index=False)

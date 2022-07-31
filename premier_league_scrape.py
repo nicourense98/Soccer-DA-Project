@@ -44,13 +44,14 @@ options = Options()
 options.headless = True
 options.add_argument("--window-size=1920,1200")
 
-# Extract both La Liga and Premier League standings data
+# Extract Premier League standings data
 def extract_league_data(league_url):
 	teams = []
 	pts = []
 	rank = []
 	season = []
 
+	# Fill season and rank columns
 	for i in range(num_teams):
 		tmp_str = str(curr_season + 1)
 		if dictionary[season_header] == None:
@@ -60,11 +61,13 @@ def extract_league_data(league_url):
 			dictionary[season_header].append(str(curr_season) + '-' + tmp_str[-2:])
 			dictionary[rank_header].append(i + add_1)
 
+	# Open website
 	DRIVER_PATH = Service('/Users/Nicholas/Desktop/chromedriver')
 	driver = webdriver.Chrome(options=options, service=DRIVER_PATH)
 	driver.get(league_url)
 	sleep(5)
 
+	# Fill club name column
 	teams_elements = driver.find_elements(by=By.XPATH, value="//span[@class='ellipsisize hsKSJe']")
 	for i in teams_elements:
 		if dictionary[club_header] == None:
@@ -72,14 +75,15 @@ def extract_league_data(league_url):
 		elif i.text != '':
 			dictionary[club_header].append(i.text)
 
+	# Add first team in league (only because Google soccer standings HTML is weird, first and last row is inconsistent with rest)
 	first_elements = driver.find_elements(by=By.XPATH, value="//td[@class='e9fBA xkW0Cc snctkc xL0E7c']")
 	if dictionary[pts_header] == None:
 		dictionary[pts_header] = [first_elements[skip_3].text]
 	else:
 		dictionary[pts_header].append(first_elements[skip_3].text)
 
+	# Add all middle elements to club points column
 	middle_elements = driver.find_elements(by=By.XPATH, value="//td[@class='e9fBA xkW0Cc snctkc']")
-
 	for i, value in enumerate(middle_elements):
 		if len(pts) <= num_middle_elements:
 			if i <= first_line_edge_case:
@@ -91,12 +95,16 @@ def extract_league_data(league_url):
 				single_element = value.text
 				dictionary[pts_header].append(single_element)
 
+	# Add last club points to column (also b/c Google soccer standings HTML is weird)
 	last_elements = driver.find_elements(by=By.XPATH, value="//td[@class='e9fBA xkW0Cc snctkc bWoKCf']")
 	dictionary[pts_header].append(last_elements[skip_3].text)
 
+	# Close chromedriver (website)
 	driver.quit()
 
 # Main
+
+# Call function and add to global season variable so that seasons input (website) changes
 extract_league_data(season_09_10)
 curr_season += 1
 extract_league_data(season_10_11)
@@ -123,6 +131,6 @@ extract_league_data(season_20_21)
 curr_season += 1
 extract_league_data(season_21_22)
 
+# Create and name csv file
 df = pd.DataFrame(dictionary)
-
 df.to_csv('premier_league_table.csv', index=False)

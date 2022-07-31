@@ -26,17 +26,20 @@ def extract_el_data(el_url):
 	club_header = 'EL Winner'
 	runner_up_header = 'EL Runner-Up'
 
+	# Open website
 	DRIVER_PATH = Service('/Users/Nicholas/Desktop/chromedriver')
 	driver = webdriver.Chrome(options=options, service=DRIVER_PATH)
 	driver.get(el_url)
 	sleep(5)
 
+	# Make season increment every row (in csv)
 	while year_oldest_season < current_year:
 		value_str = "//a[@title='" + str(year_oldest_season) + "–" + str(int(year_oldest_season_str[-2:]) + add_1) + " UEFA Europa League']"
 		seasons.append(driver.find_element(by=By.XPATH, value=value_str).text)
 		year_oldest_season += 1
 		year_oldest_season_str = str(year_oldest_season)
 
+	# HTML titles were all different so I just typed them in manually :/
 	winners.append(driver.find_element(by=By.XPATH, value="//a[@title='Atlético Madrid']").text)
 	winners.append(driver.find_element(by=By.XPATH, value="//a[@title='FC Porto']").text)
 	winners.append(driver.find_element(by=By.XPATH, value="//a[@title='Atlético Madrid']").text)
@@ -65,14 +68,17 @@ def extract_el_data(el_url):
 	runner_ups.append(driver.find_element(by=By.XPATH, value="//a[@title='Manchester United F.C.']").text)
 	runner_ups.append(driver.find_element(by=By.XPATH, value="//a[@title='Rangers F.C.']").text)
 
+	# Prepare dictionary elements to later turn into csv columns
 	dictionary[season_header] = seasons
 	dictionary[club_header] = winners
 	dictionary[runner_up_header] = runner_ups
 
+	# Close chromedriver (website)
 	driver.quit()
 
 # Main
 extract_el_data(el)
 
+# Create and name csv file
 df = pd.DataFrame(dictionary)
 df.to_csv('table.csv')
